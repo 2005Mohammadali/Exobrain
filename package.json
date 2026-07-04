@@ -1,0 +1,29 @@
+{
+  "name": "exobrain",
+  "version": "1.0.0",
+  "main": "dist/App.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "tsc && node --env-file=.env dist/App.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/2005Mohammadali/Exobrain.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/2005Mohammadali/Exobrain/issues"
+  },
+  "homepage": "https://github.com/2005Mohammadali/Exobrain#readme",
+  "description": "",
+  "dependencies": {
+    "express": "^5.2.1",
+    "mongoose": "^9.7.3"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "typescript": "^6.0.3"
+  }
+}
