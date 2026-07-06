@@ -10,7 +10,8 @@ async function dbConnect() {
     try {
         await mongoose.connect(dbUri as string);
     } catch (error) {
-        throw new Error("Could not connect your database");
+        // throw new Error("Could not connect your database");
+        console.error("Could not connect your database", error);
         process.exit(1);
     }
 }
