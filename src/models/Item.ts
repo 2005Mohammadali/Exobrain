@@ -8,6 +8,7 @@ interface IChunk{
 interface IItem extends mongoose.Document{
     userId: string,
     title?: string,
+    url?: string,
     category: 'bookmark'| 'video'| 'dump',
     content: string,
     deadline?: Date,
@@ -20,6 +21,7 @@ interface IItem extends mongoose.Document{
 const itemSchema = new mongoose.Schema({
         userId: {type: String, required: true},
         title: {type: String},
+        url: {type: String},
         category: {
             type: String,
             enum: ['bookmark', 'video', 'dump'],
