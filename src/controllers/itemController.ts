@@ -1,6 +1,6 @@
 import {Request, Response} from 'express';
 import ItemModel from '../models/Item';
-import { extractBlogContent, extractYoutubeTranscript, titleScrapper } from '../utils/scrapper.js';
+import { chunkText, extractBlogContent, extractYoutubeTranscript, titleScrapper } from '../utils/scrapper.js';
 
 const handleControllerError = (res: Response, error: unknown) => {
     const message = error instanceof Error ? error.message : String(error);
@@ -35,12 +35,12 @@ export async function addLinkItem(req: Request, res: Response) {
         const url = new URL(req.body.url);
         const urlStr = url.toString();
 
-        const isYoutube = url.hostname.includes("youtube.com") || url.hostname === "youtu.be";
+        const isYoutube = url.hostname.includes("youtube.com") || url.hostname === "youtu.be";  
         const category = isYoutube ? ("video" as const) : ("bookmark" as const);
         const placeholderItem = {
             userId: req.body.userId,
             title: "Processing link...",
-            url: urlStr,
+            url: urlStr,    
             content: "Extracting content for your AI brain...",
             category,
             chunks: [],
@@ -61,9 +61,17 @@ export async function addLinkItem(req: Request, res: Response) {
                     titleScrapper(urlStr),
                     category === "bookmark" ? await extractBlogContent(urlStr) : await extractYoutubeTranscript(urlStr)
                 ])
+
+                const rawChunks = chunkText(realContent);
+                const formattedChunks = rawChunks.map(chunkStr => ({
+                    textChunk: chunkStr,
+                    embedding: [0, 0, 0]
+                }));
+
                 ItemModel.findByIdAndUpdate(createdDoc._id, {
                     title: realTitle,
-                    content: realContent
+                    content: realContent,
+                    chunks: formattedChunks
                 }).exec();
                 console.log(`Successfully completed background processing for item: ${createdDoc._id}`);
             } catch (error) {
