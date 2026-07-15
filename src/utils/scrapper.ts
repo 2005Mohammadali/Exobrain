@@ -41,25 +41,40 @@ export async function extractBlogContent(url: string): Promise<string> {
       console.log("Error scrapping the content from URL");
       throw new Error("Failed to scrape the content");
     }
-  }
+}
   
-  export async function extractYoutubeTranscript(url: string): Promise<string> {
-    try {
-      const transcriptConfig = await YoutubeTranscript.fetchTranscript(url);
+export async function extractYoutubeTranscript(url: string): Promise<string> {
+  try {
+    const transcriptConfig = await YoutubeTranscript.fetchTranscript(url);
 
-      const cleanTranscript = transcriptConfig
-      .map((segment) => segment.text)
-      .join(" ");
+    const cleanTranscript = transcriptConfig
+    .map((segment) => segment.text)
+    .join(" ");
 
-      const decodedTranscript = cleanTranscript
-      .replace(/&#39;/g, "'")
-      .replace(/&quot;/g, '"')
-      .replace(/&amp;/g, '&');
+    const decodedTranscript = cleanTranscript
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&');
 
-      return decodedTranscript.trim();
-      
-    } catch (error) {
-      console.log("Error extracting youtube transcripts from URL");
-      throw new Error("Failed to scrape transcripts");
+    return decodedTranscript.trim();
+    
+  } catch (error) {
+    console.log("Error extracting youtube transcripts from URL");
+    throw new Error("Failed to scrape transcripts");
   }
+}
+
+export function chunkText(text: string, chunkSize = 250, overlap = 30): string[] {
+  const words = text.split(/\s+/);
+  const chunks: string[] = [];
+
+  for (let i = 0; i < words.length; i += (chunkSize - overlap)) {
+    const chunkWords = words.slice(i, i + chunkSize);
+    
+    chunks.push(chunkWords.join(" "));
+
+    if (i + chunkSize >= words.length) break;
+  }
+
+  return chunks;
 }
