@@ -87,3 +87,26 @@ export async function addLinkItem(req: Request, res: Response) {
         }
     }
 }
+
+export async function getItems(req: Request, res: Response) {
+    try {
+        const id = req.query.userId;
+        if(!id || typeof id !== 'string'){
+            return res.status(400).json({
+                msg: "Invalid userId"
+            })
+        }
+        const items = await ItemModel.find({
+            userId: id,
+            isArchived: true
+        })
+        .sort({createdAt: -1})
+        .exec();
+
+        res.status(200).json({
+            items
+        })
+    } catch (error) {
+        handleControllerError(res, error);
+    }
+}
