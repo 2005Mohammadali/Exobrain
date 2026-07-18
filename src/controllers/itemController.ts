@@ -25,7 +25,7 @@ export async function addQuickItem(req: Request, res: Response) {
             msg: "Item added successfully"
         })
         
-    } catch (error:any) {
+    } catch (error: unknown) {
         handleControllerError(res, error);
     }
 }
@@ -68,7 +68,7 @@ export async function addLinkItem(req: Request, res: Response) {
                     embedding: [0, 0, 0]
                 }));
 
-                ItemModel.findByIdAndUpdate(createdDoc._id, {
+                await ItemModel.findByIdAndUpdate(createdDoc._id, {
                     title: realTitle,
                     content: realContent,
                     chunks: formattedChunks
@@ -81,7 +81,7 @@ export async function addLinkItem(req: Request, res: Response) {
         })();
         
         
-    } catch (error:any) {
+    } catch (error: unknown) {
         if (!res.headersSent) {
             handleControllerError(res, error);
         }
@@ -94,7 +94,7 @@ export async function getItems(req: Request, res: Response) {
         if(!id || typeof id !== 'string'){
             return res.status(400).json({
                 msg: "Invalid userId"
-            })
+            });
         }
         const items = await ItemModel.find({
             userId: id,
@@ -106,7 +106,70 @@ export async function getItems(req: Request, res: Response) {
         res.status(200).json({
             items
         })
-    } catch (error) {
+    } catch (error: unknown) {
+        handleControllerError(res, error);
+    }
+}
+
+export async function archieveItem(req: Request, res:Response) {
+    try {
+        const {id} = req.params;
+        const updatedItem = await ItemModel.findByIdAndUpdate(id, {isArchived: false}, {new: true}).exec();
+
+        if(!updatedItem){
+            return res.status(404).json({msg: "Item not found"});
+        }
+
+        res.status(200).json({msg: "Item archieved successfully", item: updatedItem});
+    } catch (error: unknown) {
+        handleControllerError(res, error);
+    }
+}
+
+export async function updateItem(req: Request, res:Response) {
+    try {
+        const {id} = req.params;
+        const {title, deadline, content} = req.body;
+
+        const updateFields: Record<string,any> = {};
+        if(title !== undefined) updateFields.title = title;
+        if(content !== undefined) updateFields.content = content;
+        if(deadline !== undefined) updateFields.deadline = deadline;
+
+        const updateItem = await ItemModel.findByIdAndUpdate(
+            id,
+            updateFields,
+            {new: true, runValidators: true}
+        ).exec();
+
+        if(!updateItem){
+            return res.status(404).json({msg: "Item not found"});
+        }
+
+        res.status(200).json({
+            msg: "Item updated successfully",
+            item: updateItem
+        });
+    } catch (error: unknown) {
+        handleControllerError(res, error);
+    }
+}
+
+export async function deleteItem(req: Request, res: Response) {
+    try {
+        const {id} = req.params;
+        const deletedItem = await ItemModel.findByIdAndDelete(id).exec();
+        if(!deletedItem){
+            return res.status(404).json({
+                msg: "Item not found"
+            });
+        }
+
+        res.status(200).json({
+            msg: "Item permanently removed from Exobrain"
+        });
+
+    } catch (error: unknown) {
         handleControllerError(res, error);
     }
 }
